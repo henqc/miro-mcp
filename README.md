@@ -123,6 +123,64 @@ The MCP server communicates via stdio using JSON-RPC protocol. To run it:
 python server.py
 ```
 
+### Authentication
+
+Before using the MCP server to interact with Miro boards, you need to authenticate and obtain an access token:
+
+#### Step 1: Get Authorization URL
+
+Call the `get_auth_url` tool to retrieve the OAuth authorization URL:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_auth_url",
+    "arguments": {}
+  }
+}
+```
+
+The response will contain an `auth_url` that you need to visit in your browser.
+
+#### Step 2: Authorize the Application
+
+1. Copy the `auth_url` from the response
+2. Open it in your web browser
+3. Log in to your Miro account
+4. Review and approve the permissions requested by the application
+5. After authorization, Miro will redirect you to the callback URL specified in your configuration
+
+#### Step 3: Extract the Authorization Code
+
+After authorization, Miro redirects to your callback URL with a `code` parameter in the query string. The URL will look like:
+
+```
+http://localhost:8080/callback?code=AUTHORIZATION_CODE_HERE
+```
+
+Extract the `code` value from the URL (everything after `code=`).
+
+#### Step 4: Exchange Code for Access Token
+
+Use the `exchange_auth_code` tool with the authorization code to complete authentication:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "exchange_auth_code",
+    "arguments": {
+      "code": "AUTHORIZATION_CODE_HERE"
+    }
+  }
+}
+```
+
 ### Example MCP Client Configuration
 
 For use with MCP-compatible clients, configure the server as follows:
@@ -177,7 +235,7 @@ Here are some example JSON-RPC requests:
 
 ![Sample Output](sample-output.png)
 
-## Project Structure
+## Repository Structure
 
 ```
 miro-mcp/
